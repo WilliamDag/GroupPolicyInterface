@@ -12,5 +12,11 @@ namespace GroupPolicyInterface.Models
         public string _description { get; set; }
         public string _regPath { get; set; }
         public bool _isActive { get; set; }
+
+        public GroupPolicy(string name, string description)
+        {
+            _name = name;
+            _description = description;
+        }
     }
 }

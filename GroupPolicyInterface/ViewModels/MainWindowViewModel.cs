@@ -29,6 +29,7 @@ namespace GroupPolicyInterface.ViewModels
             textReadButton = "Read Policies";
             ReadPoliciesButtonCommand = new RelayCommand(ReadPoliciesButtonClick);
 
+            /*
             GroupPolicy groupPolicy = new GroupPolicy();
             string binPath = Path.GetDirectoryName(Directory.GetCurrentDirectory());
             string filename = Path.Combine(binPath, @"gpoList.csv");
@@ -44,6 +45,7 @@ namespace GroupPolicyInterface.ViewModels
                 groupPolicy._description = stringsArr[1];
             }
             sr.Close();
+            */
         }
 
         private void ReadPoliciesButtonClick()

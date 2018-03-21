@@ -19,8 +19,8 @@ namespace GroupPolicyInterface.ViewModels
 {
     class ReadPolicyViewModel : BaseViewModel
     {
-        private ObservableCollection<GroupPolicy> _gpoList = new ObservableCollection<GroupPolicy>();
-        public ObservableCollection<GroupPolicy> gpoList
+        private IEnumerable<GroupPolicy> _gpoList;
+        public IEnumerable<GroupPolicy> gpoList
         {
             get { return _gpoList; }
             set { _gpoList = value; }
@@ -32,9 +32,24 @@ namespace GroupPolicyInterface.ViewModels
         public ReadPolicyViewModel()
         {
             textReadButton = "Read Policies";
-
             ReadButtonCommand = new RelayCommand(ReadButtonClick);
-            
+
+            string binPath = Path.GetDirectoryName(Directory.GetCurrentDirectory());
+            string filename = Path.Combine(binPath, @"gpoList.csv");
+
+            IEnumerable<GroupPolicy> ReadCSV(string fileName)
+            {
+                string[] lines = File.ReadAllLines(fileName);
+                
+                return lines.Select(lineToSplit =>
+                {
+                    string[] data = lineToSplit.Split(';');
+
+                    return new GroupPolicy(data[0], data[1]);
+                });
+            }
+
+            gpoList = ReadCSV(filename);
 
             /*
             // Create an instance of HKEY_CURRENT_USER registry key
@@ -49,13 +64,9 @@ namespace GroupPolicyInterface.ViewModels
             masterKey.Close();
             */
         }
-
-
-
-
+        
         private void ReadButtonClick()
         {
-            GroupPolicy groupPolicy = new GroupPolicy();
         }
     }
 }

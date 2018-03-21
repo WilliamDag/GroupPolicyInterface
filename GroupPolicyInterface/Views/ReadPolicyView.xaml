@@ -19,6 +19,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <DataGrid ItemsSource="{Binding gpoList}" HorizontalAlignment="Left" Height="250" VerticalAlignment="Top" Width="425" Grid.ColumnSpan="3" Grid.RowSpan="3">
+            
         </DataGrid>
     </Grid>
 </UserControl>
