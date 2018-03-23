@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GroupPolicyInterface.Views"
              mc:Ignorable="d"
-             Height="250" Width="425"
+             Height="600" Width="1024"
              Background="AliceBlue">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -18,8 +18,18 @@
             <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding gpoList}" HorizontalAlignment="Left" Height="250" VerticalAlignment="Top" Width="425" Grid.ColumnSpan="3" Grid.RowSpan="3">
-            
+        <DataGrid Name="dg_GPOList" ItemsSource="{Binding _gpoList}" MaxHeight="500" MaxWidth="1024" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="600" VerticalAlignment="Top" Width="1024" Grid.ColumnSpan="3" Grid.RowSpan="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Policy Name" MaxWidth="300" Binding="{Binding _name}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Description" MaxWidth="600" Binding="{Binding _shortDescription}" IsReadOnly="True"/>
+                <DataGridCheckBoxColumn x:Name="cbCol_Active" Header="Active?" MaxWidth="124" Binding="{Binding _state, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsReadOnly="false" IsThreeState="True"/>
+            </DataGrid.Columns>
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding _longDescription}" MinHeight="40" MaxWidth="600" TextWrapping="Wrap" TextAlignment="Left"></TextBlock>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
         </DataGrid>
+        <Button Content="{Binding textSaveButton}" Command="{Binding SavePoliciesButtonCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="235,26,0,0" VerticalAlignment="Top" Width="136" Height="68" Grid.Row="2"/>
     </Grid>
 </UserControl>

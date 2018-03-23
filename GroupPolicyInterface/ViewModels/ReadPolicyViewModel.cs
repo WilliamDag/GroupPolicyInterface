@@ -2,15 +2,9 @@
 using System.Windows.Input;
 using GroupPolicyInterface.Commands;
 using GroupPolicyInterface.Models;
-using GroupPolicyInterface.ViewModels;
-using GroupPolicyInterface.Views;
 using Microsoft.Win32;
-using System.Diagnostics;
 using System.IO;
-using System.Data.OleDb;
 using System.Data;
-using System.Windows;
-using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -19,23 +13,22 @@ namespace GroupPolicyInterface.ViewModels
 {
     class ReadPolicyViewModel : BaseViewModel
     {
-        private IEnumerable<GroupPolicy> _gpoList;
-        public IEnumerable<GroupPolicy> gpoList
+        private ObservableCollection<GroupPolicy> gpoList;
+        public ObservableCollection<GroupPolicy> _gpoList
         {
-            get { return _gpoList; }
-            set { _gpoList = value; }
+            get { return gpoList; }
+            set { gpoList = value; }
         }
 
-        public ICommand ReadButtonCommand { get; set; }
-        public string textReadButton { get; set; }
+        public ICommand SavePoliciesButtonCommand { get; set; }
+        public string textSaveButton { get; set; }
+        
+        public string filename = Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), @"gpoList.csv");
 
         public ReadPolicyViewModel()
         {
-            textReadButton = "Read Policies";
-            ReadButtonCommand = new RelayCommand(ReadButtonClick);
-
-            string binPath = Path.GetDirectoryName(Directory.GetCurrentDirectory());
-            string filename = Path.Combine(binPath, @"gpoList.csv");
+            textSaveButton = "Save Policies";
+            SavePoliciesButtonCommand = new RelayCommand(SavePoliciesButtonClick);
 
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
@@ -44,52 +37,46 @@ namespace GroupPolicyInterface.ViewModels
                 return lines.Select(lineToSplit =>
                 {
                     string[] data = lineToSplit.Split(';');
-
-                    return new GroupPolicy(data[0], data[1]);
+                    return new GroupPolicy(data[0], data[1], data[2], data[3], data[4]);
                 });
             }
+            _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
+        }
 
-            gpoList = ReadCSV(filename);
-
-            /*
+        public void SavePoliciesButtonClick()
+        {
+            onChanged(nameof(_gpoList));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
-            // Open the Internet Explorer registry sub key under the HKEY_CURRENT_USER parent key (read only)
-            RegistryKey iexplorerKey = masterKey.OpenSubKey("SOFTWARE", true);
-            RegistryKey subKey = iexplorerKey.CreateSubKey(@"Policies\Microsoft\Internet Explorer\Restrictions");
-            subKey.SetValue("NoBrowserSaveAs", 1, RegistryValueKind.DWord);
-            Console.WriteLine(subKey.GetValue("NoBrowserSaveAs"));
-            subKey.Close();
-            iexplorerKey.Close();
+            // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
+            RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+            foreach (var item in _gpoList)
+            {
+                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
+                if (item._state == false)
+                {
+                    item._keyValue = "0";
+                    sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
+                    Console.WriteLine(item._name.ToString());
+                    Console.WriteLine(item._keyName.ToString());
+                }
+                if (item._state == true)
+                {
+                    item._keyValue = "1";
+                    sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
+                    Console.WriteLine(item._name.ToString());
+                    Console.WriteLine(item._keyName.ToString());
+                }
+                if (item._state == null)
+                {
+                    sub.DeleteValue(item._keyName);
+                    Console.WriteLine(item._name.ToString());
+                    Console.WriteLine(item._keyName.ToString());
+                }
+                sub.Close();
+            }
+            softwareKey.Close();
             masterKey.Close();
-            */
-        }
-        
-        private void ReadButtonClick()
-        {
         }
     }
 }
-
-
-/*
-private static void UpdateGPO()
-{
-    try
-    {
-        Process proc = new Process();
-        ProcessStartInfo procStartInfo = new ProcessStartInfo(@"cmd.exe", "/c" + "gpupdate/force");
-        procStartInfo.RedirectStandardOutput = true;
-        procStartInfo.UseShellExecute = false;
-        procStartInfo.CreateNoWindow = true;
-        procStartInfo.LoadUserProfile = true;
-        proc.StartInfo = procStartInfo;
-        proc.Start();
-        proc.WaitForExit();
-    }
-    catch (Exception ex)
-    {
-
-    }
-}
-*/

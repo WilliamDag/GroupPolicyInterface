@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GroupPolicyInterface"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="850">
+        Title="MainWindow" Height="768" Width="1024">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -14,12 +14,12 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Button Content="{Binding textReadButton}" Command="{Binding ReadPoliciesButtonCommand}" HorizontalAlignment="Left" Margin="19,48,0,0" VerticalAlignment="Top" Width="101" Height="53" Grid.Row="1"/>
-        <ContentControl Content="{Binding ContentControlBinding}" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="352" Width="583" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+        <Button Content="{Binding textReadButton}" Command="{Binding ReadPoliciesButtonCommand}" HorizontalAlignment="Left" Margin="28,40,0,0" VerticalAlignment="Top" Width="102" Height="53" Grid.Column="1"/>
+        <ContentControl Content="{Binding ContentControlBinding}" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="600" Width="1016" Grid.RowSpan="3" Grid.ColumnSpan="4"/>
     </Grid>
 </Window>
