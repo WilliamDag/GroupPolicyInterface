@@ -17,14 +17,8 @@ namespace GroupPolicyInterface.ViewModels
 
         public MainWindowViewModel()
         {
-            textReadButton = "Read Policies";
-            ReadPoliciesButtonCommand = new RelayCommand(ReadPoliciesButtonClick);
+            ContentControlBinding = new ReadPolicyView();
         }
 
-        private void ReadPoliciesButtonClick()
-        {
-            ContentControlBinding = new ReadPolicyView();
-            onChanged(nameof(ContentControlBinding));
-        }
     }
 }

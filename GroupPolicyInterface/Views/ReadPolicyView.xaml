@@ -18,10 +18,29 @@
             <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DataGrid Name="dg_GPOList" ItemsSource="{Binding _gpoList}" MaxHeight="500" MaxWidth="1024" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="600" VerticalAlignment="Top" Width="1024" Grid.ColumnSpan="3" Grid.RowSpan="2">
+        <DataGrid 
+            Name="dg_GPOList" 
+            ItemsSource="{Binding _gpoList}" 
+            MaxHeight="500" 
+            MaxWidth="1024" 
+            AutoGenerateColumns="False" 
+            Height="600" 
+            VerticalAlignment="Top" 
+            Width="1024" 
+            Grid.ColumnSpan="3" 
+            Grid.RowSpan="2"
+            HorizontalAlignment="Stretch"
+            ColumnWidth="*"
+            HorizontalContentAlignment="Stretch">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Policy Name" MaxWidth="300" Binding="{Binding _name}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Description" MaxWidth="600" Binding="{Binding _shortDescription}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Description" MaxWidth="600" Binding="{Binding _shortDescription}" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style>
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridCheckBoxColumn x:Name="cbCol_Active" Header="Active?" MaxWidth="124" Binding="{Binding _state, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsReadOnly="false" IsThreeState="True"/>
             </DataGrid.Columns>
             <DataGrid.RowDetailsTemplate>
