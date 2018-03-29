@@ -19,25 +19,32 @@ namespace GroupPolicyInterface.ViewModels
             get { return gpoList; }
             set { gpoList = value; }
         }
+        private List<State> states;
+
+        public List<State> _states
+        {
+            get { return states; }
+        }
 
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
-        
+
         public string filename = Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), @"gpoList.csv");
 
         public ReadPolicyViewModel()
         {
+            states = State.GetAvailableStates();
             textSaveButton = "Save Policies";
             SavePoliciesButtonCommand = new RelayCommand(SavePoliciesButtonClick);
 
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
                 string[] lines = File.ReadAllLines(fileName);
-                
+
                 return lines.Select(lineToSplit =>
                 {
                     string[] data = lineToSplit.Split(';');
-                    return new GroupPolicy(data[0], data[1], data[2], data[3], data[4]);
+                    return new GroupPolicy(data[0].TrimStart('"'), data[1], data[2], data[3], data[4], data[5], data[6]);
                 });
             }
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
@@ -46,6 +53,7 @@ namespace GroupPolicyInterface.ViewModels
         public void SavePoliciesButtonClick()
         {
             onChanged(nameof(_gpoList));
+            onChanged(nameof(_states));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
             // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
@@ -53,25 +61,25 @@ namespace GroupPolicyInterface.ViewModels
             foreach (var item in _gpoList)
             {
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
-                if (item._state == false)
+                if (item._state == "Disabled")
                 {
-                    item._keyValue = "0";
+                    item._keyValue = item._disabledValue;
                     sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
-                    Console.WriteLine(item._name.ToString());
-                    Console.WriteLine(item._keyName.ToString());
                 }
-                if (item._state == true)
+                if (item._state == "Enabled")
                 {
-                    item._keyValue = "1";
+                    item._keyValue = item._enabledValue;
                     sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
-                    Console.WriteLine(item._name.ToString());
-                    Console.WriteLine(item._keyName.ToString());
                 }
-                if (item._state == null)
+                if (item._state == "Not Configured")
                 {
-                    sub.DeleteValue(item._keyName);
-                    Console.WriteLine(item._name.ToString());
-                    Console.WriteLine(item._keyName.ToString());
+                    try
+                    {
+                        sub.DeleteValue(item._keyName);
+                    }
+                    catch (ArgumentException e)
+                    {
+                    }
                 }
                 sub.Close();
             }

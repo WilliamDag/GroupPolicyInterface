@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-E:\GroupPolicyInterface\GroupPolicyInterface\obj\Debug\
+C:\Users\William\Documents\GitHub\GroupPolicyInterface\GroupPolicyInterface\obj\Debug\
 GroupPolicyInterface
 none
 false
 DEBUG;TRACE
-E:\GroupPolicyInterface\GroupPolicyInterface\App.xaml
+C:\Users\William\Documents\GitHub\GroupPolicyInterface\GroupPolicyInterface\App.xaml
 21454590065
 
-15184721585
+162069094400
 151984215308
 MainWindow.xaml;Views\ReadPolicyView.xaml;
 
-False
+True
 

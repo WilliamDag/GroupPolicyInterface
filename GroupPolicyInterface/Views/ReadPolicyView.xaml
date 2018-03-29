@@ -41,7 +41,13 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridCheckBoxColumn x:Name="cbCol_Active" Header="Active?" MaxWidth="124" Binding="{Binding _state, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsReadOnly="false" IsThreeState="True"/>
+
+
+                <DataGridTextColumn Header="State" Binding="{Binding _state}" IsReadOnly="True"></DataGridTextColumn>
+                
+                <!-- NEED TO ADD COMBOBOX TO DISPLAY VALUES AND STATE OPTIONS HERE -->
+
+
             </DataGrid.Columns>
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
