@@ -9,7 +9,7 @@ namespace GroupPolicyInterface.Models
         public string _longDescription { get; set; }
         public string _regPath { get; set; }
         public string _keyName { get; set; }
-        public string _state { get; set; }
+        public string _state { get; set; } = "Not Configured";
         public string _keyValue { get; set; }
         public string _enabledValue { get; set; }
         public string _disabledValue { get; set; }

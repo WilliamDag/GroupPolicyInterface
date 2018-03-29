@@ -41,9 +41,17 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-
-
-                <DataGridTextColumn Header="State" Binding="{Binding _state}" IsReadOnly="True"></DataGridTextColumn>
+                <DataGridTemplateColumn x:Name="cbCol_Active" Header="State">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedValue="{Binding _state}" SelectedValuePath="Content" IsSynchronizedWithCurrentItem="True">
+                                <ComboBoxItem Content="Not Configured" Tag="Not Configured" />
+                                <ComboBoxItem Content="Disabled" Tag="Disabled" />
+                                <ComboBoxItem Content="Enabled" Tag="Enabled" />
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 
                 <!-- NEED TO ADD COMBOBOX TO DISPLAY VALUES AND STATE OPTIONS HERE -->
 
