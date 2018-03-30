@@ -6,6 +6,7 @@ namespace GroupPolicyInterface.Models
 {
     class GroupPolicy
     {
+        public string _type { get; set; }
         public string _name { get; set; }
         public string _shortDescription { get; set; }
         public string _longDescription { get; set; }
@@ -18,8 +19,9 @@ namespace GroupPolicyInterface.Models
         public string _disabledValue { get; set; }
         public string _multipleKeys { get; set; }
 
-        public GroupPolicy(string name, string shortDescription, string longDescription, string regPath, string keyName, string keyValueKind, string enabledValue, string disabledValue)
+        public GroupPolicy(string type, string name, string shortDescription, string longDescription, string regPath, string keyName, string keyValueKind, string enabledValue, string disabledValue)
         {
+            _type = type;
             _name = name;
             _shortDescription = shortDescription;
             _longDescription = longDescription;

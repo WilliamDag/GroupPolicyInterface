@@ -28,7 +28,7 @@ namespace GroupPolicyInterface.ViewModels
         private const int keyValueKind = 5;
         private const int enabledValue = 6;
         private const int disabledValue = 7;
-        
+
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
 
@@ -46,7 +46,17 @@ namespace GroupPolicyInterface.ViewModels
                 return lines.Select(lineToSplit =>
                 {
                     string[] data = lineToSplit.Split(';');
-                    return new GroupPolicy(data[name].TrimStart('"'), data[shortDescription], data[longDescription],
+                    string type = "";
+                    string nameOnly = data[name];
+                    if (data[name].Contains("["))
+                    {
+                        string fullName = data[name].TrimStart('"');
+                        int typeStartIndex = fullName.IndexOf("[");
+                        int typeEndIndex = fullName.IndexOf("]");
+                        type = fullName.Substring(typeStartIndex+1, typeEndIndex-1);
+                        nameOnly = fullName.Substring(typeEndIndex+1);
+                    }
+                    return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
                         data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
                 });
             }
