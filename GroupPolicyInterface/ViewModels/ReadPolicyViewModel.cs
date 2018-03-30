@@ -51,13 +51,15 @@ namespace GroupPolicyInterface.ViewModels
             RegistryKey masterKey = Registry.CurrentUser;
             // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
             RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
-            RegistryValueKind regKeyValueKind = RegistryValueKind.DWord;
+            RegistryValueKind regKeyValueKind;
             foreach (var item in _gpoList)
             {
                 if (item._keyValueKind == "String")
                 {
                     regKeyValueKind = RegistryValueKind.String;
                 }
+                else
+                    regKeyValueKind = RegistryValueKind.DWord;
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
                 if (item._state == "Disabled")
                 {                    
