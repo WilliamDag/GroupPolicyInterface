@@ -8,6 +8,7 @@ using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace GroupPolicyInterface.ViewModels
 {
@@ -19,12 +20,6 @@ namespace GroupPolicyInterface.ViewModels
             get { return gpoList; }
             set { gpoList = value; }
         }
-        private List<State> states;
-
-        public List<State> _states
-        {
-            get { return states; }
-        }
 
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
@@ -33,7 +28,6 @@ namespace GroupPolicyInterface.ViewModels
 
         public ReadPolicyViewModel()
         {
-            states = State.GetAvailableStates();
             textSaveButton = "Save Policies";
             SavePoliciesButtonCommand = new RelayCommand(SavePoliciesButtonClick);
 
@@ -44,7 +38,7 @@ namespace GroupPolicyInterface.ViewModels
                 return lines.Select(lineToSplit =>
                 {
                     string[] data = lineToSplit.Split(';');
-                    return new GroupPolicy(data[0].TrimStart('"'), data[1], data[2], data[3], data[4], data[5], data[6]);
+                    return new GroupPolicy(data[0].TrimStart('"'), data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
                 });
             }
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
@@ -53,26 +47,32 @@ namespace GroupPolicyInterface.ViewModels
         public void SavePoliciesButtonClick()
         {
             onChanged(nameof(_gpoList));
-            onChanged(nameof(_states));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
             // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
             RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+            RegistryValueKind regKeyValueKind = RegistryValueKind.DWord;
             foreach (var item in _gpoList)
             {
+                if (item._keyValueKind == "String")
+                {
+                    regKeyValueKind = RegistryValueKind.String;
+                }
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
                 if (item._state == "Disabled")
-                {
+                {                    
                     item._keyValue = item._disabledValue;
-                    sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
+                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                 }
                 if (item._state == "Enabled")
                 {
                     item._keyValue = item._enabledValue;
-                    sub.SetValue(item._keyName, item._keyValue, RegistryValueKind.DWord);
+                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                 }
-                if (item._state == "Not Configured")
+                if (item._state == "Not Configured" || item._state == null)
                 {
+                    item._keyValue = item._disabledValue;
+                    sub.SetValue(item._keyName, 0, regKeyValueKind);
                     try
                     {
                         sub.DeleteValue(item._keyName);

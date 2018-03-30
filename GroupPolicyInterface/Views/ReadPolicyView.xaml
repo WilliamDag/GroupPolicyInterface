@@ -33,7 +33,13 @@
             ColumnWidth="*"
             HorizontalContentAlignment="Stretch">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Policy Name" MaxWidth="300" Binding="{Binding _name}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Policy Name" MaxWidth="300" Binding="{Binding _name}" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style>
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="Description" MaxWidth="600" Binding="{Binding _shortDescription}" IsReadOnly="True">
                     <DataGridTextColumn.ElementStyle>
                         <Style>
@@ -44,7 +50,7 @@
                 <DataGridTemplateColumn x:Name="cbCol_Active" Header="State">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ComboBox SelectedValue="{Binding _state}" SelectedValuePath="Content" IsSynchronizedWithCurrentItem="True">
+                            <ComboBox SelectedValue="{Binding _state, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Content" IsSynchronizedWithCurrentItem="True">
                                 <ComboBoxItem Content="Not Configured" Tag="Not Configured" />
                                 <ComboBoxItem Content="Disabled" Tag="Disabled" />
                                 <ComboBoxItem Content="Enabled" Tag="Enabled" />
@@ -52,10 +58,6 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                
-                <!-- NEED TO ADD COMBOBOX TO DISPLAY VALUES AND STATE OPTIONS HERE -->
-
-
             </DataGrid.Columns>
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>

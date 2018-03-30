@@ -19,6 +19,5 @@ namespace GroupPolicyInterface.ViewModels
         {
             ContentControlBinding = new ReadPolicyView();
         }
-
     }
 }
