@@ -110,6 +110,7 @@
             </DataGrid.RowDetailsTemplate>
         </DataGrid>
         <Button Content="{Binding textSaveButton}" Command="{Binding SavePoliciesButtonCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="235,26,0,0" VerticalAlignment="Top" Width="136" Height="68" Grid.Row="2"/>
+        <Button Content="{Binding textEnableAllButton}" Command="{Binding EnableAllPoliciesButtonCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="474,22,0,0" VerticalAlignment="Top" Width="136" Height="68" Grid.Row="2"/>
     </Grid>
 </UserControl>
 
