@@ -16,6 +16,7 @@ namespace GroupPolicyInterface.Models
         public string _keyValueKind { get; set; }
         public string _enabledValue { get; set; }
         public string _disabledValue { get; set; }
+        public string _multipleKeys { get; set; }
 
         public GroupPolicy(string name, string shortDescription, string longDescription, string regPath, string keyName, string keyValueKind, string enabledValue, string disabledValue)
         {
@@ -23,7 +24,19 @@ namespace GroupPolicyInterface.Models
             _shortDescription = shortDescription;
             _longDescription = longDescription;
             _regPath = regPath;
-            _keyName = keyName;
+            if(keyName.Contains(","))
+            {
+                _multipleKeys = keyName;
+                string[] multipleKeys = keyName.Split(',');
+                foreach (string keyname in multipleKeys)
+                {
+                    _keyName = keyname;
+                }
+            }
+            else
+            {
+                _keyName = keyName;
+            }
             _keyValueKind = keyValueKind;
             _enabledValue = enabledValue;
             _disabledValue = disabledValue.Substring(0, disabledValue.Length - 1);

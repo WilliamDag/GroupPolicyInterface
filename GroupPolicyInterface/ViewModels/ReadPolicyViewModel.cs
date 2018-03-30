@@ -20,7 +20,15 @@ namespace GroupPolicyInterface.ViewModels
             get { return gpoList; }
             set { gpoList = value; }
         }
-
+        private const int name = 0;
+        private const int shortDescription = 1;
+        private const int longDescription = 2;
+        private const int regPath = 3;
+        private const int keyName = 4;
+        private const int keyValueKind = 5;
+        private const int enabledValue = 6;
+        private const int disabledValue = 7;
+        
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
 
@@ -38,7 +46,8 @@ namespace GroupPolicyInterface.ViewModels
                 return lines.Select(lineToSplit =>
                 {
                     string[] data = lineToSplit.Split(';');
-                    return new GroupPolicy(data[0].TrimStart('"'), data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+                    return new GroupPolicy(data[name].TrimStart('"'), data[shortDescription], data[longDescription],
+                        data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
                 });
             }
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
@@ -62,25 +71,71 @@ namespace GroupPolicyInterface.ViewModels
                     regKeyValueKind = RegistryValueKind.DWord;
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
                 if (item._state == "Disabled")
-                {                    
-                    item._keyValue = item._disabledValue;
-                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                {
+                    if (item._multipleKeys != null)
+                    {
+                        string[] multipleKeys = item._multipleKeys.Split(',');
+                        foreach (string keyname in multipleKeys)
+                        {
+                            item._keyName = keyname;
+                            item._keyValue = item._disabledValue;
+                            sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        }
+                    }
+                    else
+                    {
+                        item._keyValue = item._disabledValue;
+                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                    }
                 }
                 if (item._state == "Enabled")
                 {
-                    item._keyValue = item._enabledValue;
-                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                    if (item._multipleKeys != null)
+                    {
+                        string[] multipleKeys = item._multipleKeys.Split(',');
+                        foreach (string keyname in multipleKeys)
+                        {
+                            item._keyName = keyname;
+                            item._keyValue = item._enabledValue;
+                            sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        }
+                    }
+                    else
+                    {
+                        item._keyValue = item._enabledValue;
+                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                    }
                 }
                 if (item._state == "Not Configured" || item._state == null)
                 {
-                    item._keyValue = item._disabledValue;
-                    sub.SetValue(item._keyName, 0, regKeyValueKind);
-                    try
+                    if (item._multipleKeys != null)
                     {
-                        sub.DeleteValue(item._keyName);
+                        string[] multipleKeys = item._multipleKeys.Split(',');
+                        foreach (string keyname in multipleKeys)
+                        {
+                            item._keyName = keyname;
+                            item._keyValue = item._disabledValue;
+                            sub.SetValue(item._keyName, 0, regKeyValueKind);
+                            try
+                            {
+                                sub.DeleteValue(item._keyName);
+                            }
+                            catch (ArgumentException e)
+                            {
+                            }
+                        }
                     }
-                    catch (ArgumentException e)
+                    else
                     {
+                        item._keyValue = item._disabledValue;
+                        sub.SetValue(item._keyName, 0, regKeyValueKind);
+                        try
+                        {
+                            sub.DeleteValue(item._keyName);
+                        }
+                        catch (ArgumentException e)
+                        {
+                        }
                     }
                 }
                 sub.Close();
