@@ -31,6 +31,8 @@ namespace GroupPolicyInterface.ViewModels
         
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
+        public ICommand EnableAllPoliciesButtonCommand { get; set; }
+        public string textEnableAllButton { get; set; }
 
         public string filename = Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), @"gpoList.csv");
 
@@ -38,6 +40,8 @@ namespace GroupPolicyInterface.ViewModels
         {
             textSaveButton = "Save Policies";
             SavePoliciesButtonCommand = new RelayCommand(SavePoliciesButtonClick);
+            textEnableAllButton = "Enable All";
+            EnableAllPoliciesButtonCommand = new RelayCommand(EnableAllPoliciesButtonClick);
 
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
@@ -53,6 +57,31 @@ namespace GroupPolicyInterface.ViewModels
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
         }
 
+        public void EnableAllPoliciesButtonClick()
+        {
+            onChanged(nameof(_gpoList));
+            // Create an instance of HKEY_CURRENT_USER registry key
+            RegistryKey masterKey = Registry.CurrentUser;
+            // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
+            RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+            RegistryValueKind regKeyValueKind;
+            foreach (var item in _gpoList)
+            {
+                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
+                if (item._keyValueKind == "String")
+                {
+                    regKeyValueKind = RegistryValueKind.String;
+                }
+                else
+                    regKeyValueKind = RegistryValueKind.DWord;
+                item._keyValue = item._enabledValue;
+                sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                sub.Close();
+            }
+            softwareKey.Close();
+            masterKey.Close();
+        }
+
         public void SavePoliciesButtonClick()
         {
             onChanged(nameof(_gpoList));
@@ -63,13 +92,13 @@ namespace GroupPolicyInterface.ViewModels
             RegistryValueKind regKeyValueKind;
             foreach (var item in _gpoList)
             {
+                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
                 if (item._keyValueKind == "String")
                 {
                     regKeyValueKind = RegistryValueKind.String;
                 }
                 else
                     regKeyValueKind = RegistryValueKind.DWord;
-                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
                 if (item._state == "Disabled")
                 {
                     if (item._multipleKeys != null)
