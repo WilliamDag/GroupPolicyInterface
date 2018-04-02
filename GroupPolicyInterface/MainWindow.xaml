@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GroupPolicyInterface"
         mc:Ignorable="d"
-        Title="MainWindow" Height="768" Width="1024">
+        Title="Group Policy Interface" TextBlock.TextAlignment="Center" 
+        Height="768" Width="1024" Icon="Diddo.ico"
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <ContentControl Content="{Binding ContentControlBinding}" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="600" Width="1016" Grid.RowSpan="3" Grid.ColumnSpan="4"/>
     </Grid>
