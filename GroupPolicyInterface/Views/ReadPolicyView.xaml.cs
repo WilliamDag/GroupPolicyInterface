@@ -27,9 +27,6 @@ namespace GroupPolicyInterface.Views
             this.DataContext = new ReadPolicyViewModel();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
     }
 }

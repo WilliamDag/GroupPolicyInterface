@@ -5,10 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GroupPolicyInterface"
         mc:Ignorable="d"
-        Title="Group Policy Interface" TextBlock.TextAlignment="Center" 
-        Height="768" Width="1024" Icon="Diddo.ico"
-        WindowStartupLocation="CenterScreen">
-    <Grid>
-        <ContentControl Content="{Binding ContentControlBinding}" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="600" Width="1016" Grid.RowSpan="3" Grid.ColumnSpan="4"/>
-    </Grid>
+        Title="Group Policy Interface" Height="700" Width="1070" Icon="Diddo.ico"
+        WindowStartupLocation="CenterScreen"
+        Background="#262626">
+    <ScrollViewer Margin="5" CanContentScroll="False" >
+        <Viewbox>
+            <Grid>
+                <ContentControl Content="{Binding ContentControlBinding}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Height="600" Width="1030" Grid.RowSpan="3" Grid.ColumnSpan="4" TextBlock.FontSize="15" TextBlock.TextAlignment="Center"/>
+            </Grid>
+        </Viewbox>
+    </ScrollViewer>
 </Window>
