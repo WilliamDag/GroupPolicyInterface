@@ -53,7 +53,7 @@ namespace GroupPolicyInterface.ViewModels
                 {
                     string[] data = lineToSplit.Split(';');
                     string type = "";
-                    string nameOnly = data[name];
+                    string nameOnly = data[name].TrimStart('"');
                     if (data[name].Contains("["))
                     {
                         string fullName = data[name].TrimStart('"');
@@ -170,6 +170,11 @@ namespace GroupPolicyInterface.ViewModels
                     {
                         item._keyValue = item._enabledValue;
                         sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        if(item._keyName == "ListBox_Support_CLSID")
+                        {
+                            //TODO
+                            MessageBox.Show("Need to add items to Add-On List.");
+                        }
                     }
                 }
                 if (item._state == "Not Configured" || item._state == null)
@@ -180,11 +185,12 @@ namespace GroupPolicyInterface.ViewModels
                         foreach (string keyname in multipleKeys)
                         {
                             item._keyName = keyname;
-                            item._keyValue = item._disabledValue;
-                            sub.SetValue(item._keyName, 0, regKeyValueKind);
                             try
                             {
-                                sub.DeleteValue(item._keyName);
+                                if (sub.GetValue(item._keyName) != null)
+                                {
+                                    sub.DeleteValue(item._keyName);
+                                }
                             }
                             catch (ArgumentException e)
                             {
@@ -193,11 +199,12 @@ namespace GroupPolicyInterface.ViewModels
                     }
                     else
                     {
-                        item._keyValue = item._disabledValue;
-                        sub.SetValue(item._keyName, 0, regKeyValueKind);
                         try
                         {
-                            sub.DeleteValue(item._keyName);
+                            if(sub.GetValue(item._keyName) != null)
+                            {
+                                sub.DeleteValue(item._keyName);
+                            }
                         }
                         catch (ArgumentException e)
                         {
