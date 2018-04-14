@@ -31,10 +31,13 @@ namespace GroupPolicyInterface.ViewModels
 
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
+        public ICommand UpdatePoliciesButtonCommand { get; set; }
+        public string textUpdateButton { get; set; }
         public ICommand EnableAllPoliciesButtonCommand { get; set; }
         public string textEnableAllButton { get; set; }
         public ICommand DisableAllPoliciesButtonCommand { get; set; }
         public string textDisableAllButton { get; set; }
+
         public string filename = Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), @"gpoList.csv");
 
         public ReadPolicyViewModel()
@@ -44,6 +47,9 @@ namespace GroupPolicyInterface.ViewModels
             textEnableAllButton = "Enable All";
             EnableAllPoliciesButtonCommand = new RelayCommand(EnableAllPoliciesButtonClick);
             textDisableAllButton = "Disable All";
+            DisableAllPoliciesButtonCommand = new RelayCommand(DisableAllPoliciesButtonClick);
+            textUpdateButton = "Update";
+            UpdatePoliciesButtonCommand = new RelayCommand(UpdatePoliciesButtonClick);
 
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
@@ -68,6 +74,33 @@ namespace GroupPolicyInterface.ViewModels
             }
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
         }
+        public void UpdatePoliciesButtonClick()
+        {
+            
+            IEnumerable<GroupPolicy> ReadCSV(string fileName)
+            {
+                string[] lines = File.ReadAllLines(fileName);
+
+                return lines.Select(lineToSplit =>
+                {
+                    string[] data = lineToSplit.Split(';');
+                    string type = "";
+                    string nameOnly = data[name].TrimStart('"');
+                    if (data[name].Contains("["))
+                    {
+                        string fullName = data[name].TrimStart('"');
+                        int typeStartIndex = fullName.IndexOf("[");
+                        int typeEndIndex = fullName.IndexOf("]");
+                        type = fullName.Substring(typeStartIndex + 1, typeEndIndex - 1);
+                        nameOnly = fullName.Substring(typeEndIndex + 1);
+                    }
+                    return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
+                        data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
+                });
+            }
+            _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
+            MessageBox.Show("works");
+        }
 
         public void EnableAllPoliciesButtonClick()
         {
@@ -80,16 +113,22 @@ namespace GroupPolicyInterface.ViewModels
             foreach (var item in _gpoList)
             {
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
-                if (item._keyValueKind == "String")
+                try
                 {
-                    regKeyValueKind = RegistryValueKind.String;
+                    if (item._keyValueKind == "String")
+                    {
+                        regKeyValueKind = RegistryValueKind.String;
+                    }
+                    else
+                        regKeyValueKind = RegistryValueKind.DWord;
+                    item._keyValue = item._enabledValue;
+                    
+                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                    sub.Close();
                 }
-                else
-                    regKeyValueKind = RegistryValueKind.DWord;
-                item._keyValue = item._enabledValue;
-                sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                sub.Close();
+                catch(ArgumentException e) { }
             }
+            MessageBox.Show("woooorks");
             softwareKey.Close();
             masterKey.Close();
         }
@@ -103,22 +142,28 @@ namespace GroupPolicyInterface.ViewModels
             RegistryValueKind regKeyValueKind;
             foreach (var item in _gpoList)
             {
-                item._state = "Disabled";
                 RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
-                if (item._keyValueKind == "String")
+                try
                 {
-                    regKeyValueKind = RegistryValueKind.String;
+                    if (item._keyValueKind == "String")
+                    {
+                        regKeyValueKind = RegistryValueKind.String;
+                    }
+                    else
+                        regKeyValueKind = RegistryValueKind.DWord;
+                    item._keyValue = item._disabledValue;
+
+                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                    sub.Close();
                 }
-                else
-                    regKeyValueKind = RegistryValueKind.DWord;
+                catch(ArgumentException e) { }
                 
-                item._keyValue = item._disabledValue;
-                sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                sub.Close();
             }
+            MessageBox.Show("woooorks yas");
             softwareKey.Close();
             masterKey.Close();
         }
+
         public void SavePoliciesButtonClick()
         {
             onChanged(nameof(_gpoList));
@@ -135,47 +180,56 @@ namespace GroupPolicyInterface.ViewModels
                     regKeyValueKind = RegistryValueKind.String;
                 }
                 else
+                {
                     regKeyValueKind = RegistryValueKind.DWord;
+                }
+                    
                 if (item._state == "Disabled")
                 {
-                    if (item._multipleKeys != null)
+                    try
                     {
-                        string[] multipleKeys = item._multipleKeys.Split(',');
-                        foreach (string keyname in multipleKeys)
+                        if (item._multipleKeys != null)
                         {
-                            item._keyName = keyname;
+                            string[] multipleKeys = item._multipleKeys.Split(',');
+                            foreach (string keyname in multipleKeys)
+                            {
+                                item._keyName = keyname;
+                                item._keyValue = item._disabledValue;
+                                sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                            }
+                        }
+                        else
+                        {
                             item._keyValue = item._disabledValue;
                             sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                         }
                     }
-                    else
-                    {
-                        item._keyValue = item._disabledValue;
-                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                    }
+                    catch(ArgumentException e) { }
+                    
+                    
                 }
                 if (item._state == "Enabled")
                 {
-                    if (item._multipleKeys != null)
+                    try
                     {
-                        string[] multipleKeys = item._multipleKeys.Split(',');
-                        foreach (string keyname in multipleKeys)
+                        if (item._multipleKeys != null)
                         {
-                            item._keyName = keyname;
+                            string[] multipleKeys = item._multipleKeys.Split(',');
+                            foreach (string keyname in multipleKeys)
+                            {
+                                item._keyName = keyname;
+                                item._keyValue = item._enabledValue;
+                                sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                            }
+                        }
+                        else
+                        {
                             item._keyValue = item._enabledValue;
                             sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                         }
                     }
-                    else
-                    {
-                        item._keyValue = item._enabledValue;
-                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                        if(item._keyName == "ListBox_Support_CLSID")
-                        {
-                            //TODO
-                            MessageBox.Show("Need to add items to Add-On List.");
-                        }
-                    }
+                    catch (ArgumentException e) { }
+                    
                 }
                 if (item._state == "Not Configured" || item._state == null)
                 {
@@ -201,7 +255,7 @@ namespace GroupPolicyInterface.ViewModels
                     {
                         try
                         {
-                            if(sub.GetValue(item._keyName) != null)
+                            if (sub.GetValue(item._keyName) != null)
                             {
                                 sub.DeleteValue(item._keyName);
                             }
@@ -215,6 +269,7 @@ namespace GroupPolicyInterface.ViewModels
             }
             softwareKey.Close();
             masterKey.Close();
+            UpdatePoliciesButtonClick();
         }
     }
 }
