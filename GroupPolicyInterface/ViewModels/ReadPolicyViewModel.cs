@@ -31,12 +31,12 @@ namespace GroupPolicyInterface.ViewModels
 
         public ICommand SavePoliciesButtonCommand { get; set; }
         public string textSaveButton { get; set; }
-        public ICommand UpdatePoliciesButtonCommand { get; set; }
-        public string textUpdateButton { get; set; }
         public ICommand EnableAllPoliciesButtonCommand { get; set; }
         public string textEnableAllButton { get; set; }
         public ICommand DisableAllPoliciesButtonCommand { get; set; }
         public string textDisableAllButton { get; set; }
+        public ICommand ResetAllPoliciesButtonCommand { get; set; }
+        public string textResetAllButton { get; set; }
 
         public string filename = Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), @"gpoList.csv");
 
@@ -48,8 +48,8 @@ namespace GroupPolicyInterface.ViewModels
             EnableAllPoliciesButtonCommand = new RelayCommand(EnableAllPoliciesButtonClick);
             textDisableAllButton = "Disable All";
             DisableAllPoliciesButtonCommand = new RelayCommand(DisableAllPoliciesButtonClick);
-            textUpdateButton = "Update";
-            UpdatePoliciesButtonCommand = new RelayCommand(UpdatePoliciesButtonClick);
+            textResetAllButton = "Reset All";
+            ResetAllPoliciesButtonCommand = new RelayCommand(ResetAllPoliciesButtonClick);
 
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
@@ -74,98 +74,131 @@ namespace GroupPolicyInterface.ViewModels
             }
             _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
         }
-        public void UpdatePoliciesButtonClick()
+        public void ResetAllPoliciesButtonClick()
         {
-            
-            IEnumerable<GroupPolicy> ReadCSV(string fileName)
+            if (MessageBox.Show("Are you sure you want to Reset All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                string[] lines = File.ReadAllLines(fileName);
-
-                return lines.Select(lineToSplit =>
+                onChanged(nameof(_gpoList));
+                // Create an instance of HKEY_CURRENT_USER registry key
+                RegistryKey masterKey = Registry.CurrentUser;
+                // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
+                RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+                RegistryValueKind regKeyValueKind;
+                foreach (var item in _gpoList)
                 {
-                    string[] data = lineToSplit.Split(';');
-                    string type = "";
-                    string nameOnly = data[name].TrimStart('"');
-                    if (data[name].Contains("["))
+                    RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
+                    try
                     {
-                        string fullName = data[name].TrimStart('"');
-                        int typeStartIndex = fullName.IndexOf("[");
-                        int typeEndIndex = fullName.IndexOf("]");
-                        type = fullName.Substring(typeStartIndex + 1, typeEndIndex - 1);
-                        nameOnly = fullName.Substring(typeEndIndex + 1);
-                    }
-                    return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
-                        data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
-                });
-            }
-            _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
-            MessageBox.Show("works");
-        }
+                        if (item._keyValueKind == "String")
+                        {
+                            regKeyValueKind = RegistryValueKind.String;
+                        }
+                        else
+                            regKeyValueKind = RegistryValueKind.DWord;
 
+                        if(item._state == "Enabled" || item._state== "Disabled")
+                        {
+                            item._state = "Not Configured";
+                            item._keyValue = null;
+                        }
+
+                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        sub.Close();
+                    }
+                    catch (ArgumentException e) { }
+                }
+
+                softwareKey.Close();
+                masterKey.Close();
+                UpdatePolicies();
+                MessageBox.Show("Press Save Policies to save.");
+            }
+                        
+        }
         public void EnableAllPoliciesButtonClick()
         {
-            onChanged(nameof(_gpoList));
-            // Create an instance of HKEY_CURRENT_USER registry key
-            RegistryKey masterKey = Registry.CurrentUser;
-            // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
-            RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
-            RegistryValueKind regKeyValueKind;
-            foreach (var item in _gpoList)
+            if (MessageBox.Show("Are you sure you want to Enable All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
-                try
+                onChanged(nameof(_gpoList));
+                // Create an instance of HKEY_CURRENT_USER registry key
+                RegistryKey masterKey = Registry.CurrentUser;
+                // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
+                RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+                RegistryValueKind regKeyValueKind;
+                foreach (var item in _gpoList)
                 {
-                    if (item._keyValueKind == "String")
+                    RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
+                    try
                     {
-                        regKeyValueKind = RegistryValueKind.String;
+                        if (item._keyValueKind == "String")
+                        {
+                            regKeyValueKind = RegistryValueKind.String;
+                        }
+                        else
+                            regKeyValueKind = RegistryValueKind.DWord;
+                        if (item._state == "Disabled" || item._state == "Not Configured")
+                        {
+                            item._state = "Enabled";
+                        }
+                        item._keyValue = item._enabledValue;
+
+                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        sub.Close();
                     }
-                    else
-                        regKeyValueKind = RegistryValueKind.DWord;
-                    item._keyValue = item._enabledValue;
-                    
-                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                    sub.Close();
+                    catch (ArgumentException e) { }
                 }
-                catch(ArgumentException e) { }
+
+                softwareKey.Close();
+                masterKey.Close();
+                UpdatePolicies();
+                MessageBox.Show("Press Save Policies to save.");
             }
-            MessageBox.Show("woooorks");
-            softwareKey.Close();
-            masterKey.Close();
+                        
         }
         public void DisableAllPoliciesButtonClick()
         {
-            onChanged(nameof(_gpoList));
-            // Create an instance of HKEY_CURRENT_USER registry key
-            RegistryKey masterKey = Registry.CurrentUser;
-            // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
-            RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
-            RegistryValueKind regKeyValueKind;
-            foreach (var item in _gpoList)
+            if (MessageBox.Show("Are you sure you want to Disable All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
-                try
+                onChanged(nameof(_gpoList));
+                // Create an instance of HKEY_CURRENT_USER registry key
+                RegistryKey masterKey = Registry.CurrentUser;
+                // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
+                RegistryKey softwareKey = masterKey.OpenSubKey("SOFTWARE", true);
+                RegistryValueKind regKeyValueKind;
+                foreach (var item in _gpoList)
                 {
-                    if (item._keyValueKind == "String")
+                    RegistryKey sub = softwareKey.CreateSubKey(item._regPath);
+                    try
                     {
-                        regKeyValueKind = RegistryValueKind.String;
+                        if (item._keyValueKind == "String")
+                        {
+                            regKeyValueKind = RegistryValueKind.String;
+                        }
+                        else
+                            regKeyValueKind = RegistryValueKind.DWord;
+                        if (item._state == "Enabled" || item._state == "Not Configured")
+                        {
+                            item._state = "Disabled";
+                            
+                        }
+                        item._keyValue = item._disabledValue;
+                        sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
+                        sub.Close();
                     }
-                    else
-                        regKeyValueKind = RegistryValueKind.DWord;
-                    item._keyValue = item._disabledValue;
-
-                    sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
-                    sub.Close();
-                }
-                catch(ArgumentException e) { }
+                    catch(ArgumentException e) { }
                 
+                }
+                softwareKey.Close();
+                masterKey.Close();
+                //UpdatePolicies();
+                MessageBox.Show("Press Save Policies to save.");
             }
-            MessageBox.Show("woooorks yas");
-            softwareKey.Close();
-            masterKey.Close();
+                        
         }
-
+        
         public void SavePoliciesButtonClick()
         {
+            UpdatePolicies();
             onChanged(nameof(_gpoList));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
@@ -269,7 +302,33 @@ namespace GroupPolicyInterface.ViewModels
             }
             softwareKey.Close();
             masterKey.Close();
-            UpdatePoliciesButtonClick();
+        }
+        public void UpdatePolicies()
+        {
+
+            IEnumerable<GroupPolicy> ReadCSV(string fileName)
+            {
+                string[] lines = File.ReadAllLines(fileName);
+
+                return lines.Select(lineToSplit =>
+                {
+                    string[] data = lineToSplit.Split(';');
+                    string type = "";
+                    string nameOnly = data[name].TrimStart('"');
+                    if (data[name].Contains("["))
+                    {
+                        string fullName = data[name].TrimStart('"');
+                        int typeStartIndex = fullName.IndexOf("[");
+                        int typeEndIndex = fullName.IndexOf("]");
+                        type = fullName.Substring(typeStartIndex + 1, typeEndIndex - 1);
+                        nameOnly = fullName.Substring(typeEndIndex + 1);
+                    }
+                    return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
+                        data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
+                });
+            }
+            _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
+            MessageBox.Show("Updating...");
         }
     }
 }
