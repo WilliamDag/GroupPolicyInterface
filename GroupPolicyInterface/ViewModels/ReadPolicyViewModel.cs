@@ -198,7 +198,6 @@ namespace GroupPolicyInterface.ViewModels
         
         public void SavePoliciesButtonClick()
         {
-            UpdatePolicies();
             onChanged(nameof(_gpoList));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
@@ -302,6 +301,7 @@ namespace GroupPolicyInterface.ViewModels
             }
             softwareKey.Close();
             masterKey.Close();
+            UpdatePolicies();
         }
         public void UpdatePolicies()
         {
