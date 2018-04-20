@@ -51,6 +51,10 @@ namespace GroupPolicyInterface.ViewModels
             textResetAllButton = "Reset All";
             ResetAllPoliciesButtonCommand = new RelayCommand(ResetAllPoliciesButtonClick);
 
+            UpdatePolicies();
+        }
+        public void UpdatePolicies()
+        {
             IEnumerable<GroupPolicy> ReadCSV(string fileName)
             {
                 string[] lines = File.ReadAllLines(fileName);
@@ -65,8 +69,8 @@ namespace GroupPolicyInterface.ViewModels
                         string fullName = data[name].TrimStart('"');
                         int typeStartIndex = fullName.IndexOf("[");
                         int typeEndIndex = fullName.IndexOf("]");
-                        type = fullName.Substring(typeStartIndex+1, typeEndIndex-1);
-                        nameOnly = fullName.Substring(typeEndIndex+1);
+                        type = fullName.Substring(typeStartIndex + 1, typeEndIndex - 1);
+                        nameOnly = fullName.Substring(typeEndIndex + 1);
                     }
                     return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
                         data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
@@ -78,7 +82,6 @@ namespace GroupPolicyInterface.ViewModels
         {
             if (MessageBox.Show("Are you sure you want to Reset All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                onChanged(nameof(_gpoList));
                 // Create an instance of HKEY_CURRENT_USER registry key
                 RegistryKey masterKey = Registry.CurrentUser;
                 // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
@@ -99,9 +102,9 @@ namespace GroupPolicyInterface.ViewModels
                         if(item._state == "Enabled" || item._state== "Disabled")
                         {
                             item._state = "Not Configured";
-                            item._keyValue = null;
+                            
                         }
-
+                        item._keyValue = null;
                         sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                         sub.Close();
                     }
@@ -110,7 +113,7 @@ namespace GroupPolicyInterface.ViewModels
 
                 softwareKey.Close();
                 masterKey.Close();
-                UpdatePolicies();
+                onChanged(nameof(_gpoList));
                 MessageBox.Show("Press Save Policies to save.");
             }
                         
@@ -119,7 +122,6 @@ namespace GroupPolicyInterface.ViewModels
         {
             if (MessageBox.Show("Are you sure you want to Enable All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                onChanged(nameof(_gpoList));
                 // Create an instance of HKEY_CURRENT_USER registry key
                 RegistryKey masterKey = Registry.CurrentUser;
                 // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
@@ -150,7 +152,7 @@ namespace GroupPolicyInterface.ViewModels
 
                 softwareKey.Close();
                 masterKey.Close();
-                UpdatePolicies();
+                onChanged(nameof(_gpoList));
                 MessageBox.Show("Press Save Policies to save.");
             }
                         
@@ -159,7 +161,6 @@ namespace GroupPolicyInterface.ViewModels
         {
             if (MessageBox.Show("Are you sure you want to Disable All?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                onChanged(nameof(_gpoList));
                 // Create an instance of HKEY_CURRENT_USER registry key
                 RegistryKey masterKey = Registry.CurrentUser;
                 // Open the Software registry sub key under the HKEY_CURRENT_USER parent key (read only)
@@ -179,26 +180,24 @@ namespace GroupPolicyInterface.ViewModels
                         if (item._state == "Enabled" || item._state == "Not Configured")
                         {
                             item._state = "Disabled";
-                            
                         }
                         item._keyValue = item._disabledValue;
+
                         sub.SetValue(item._keyName, item._keyValue, regKeyValueKind);
                         sub.Close();
                     }
-                    catch(ArgumentException e) { }
-                
+                    catch (ArgumentException e) { }
                 }
+
                 softwareKey.Close();
                 masterKey.Close();
-                //UpdatePolicies();
+                onChanged(nameof(_gpoList));
                 MessageBox.Show("Press Save Policies to save.");
             }
-                        
         }
         
         public void SavePoliciesButtonClick()
         {
-            UpdatePolicies();
             onChanged(nameof(_gpoList));
             // Create an instance of HKEY_CURRENT_USER registry key
             RegistryKey masterKey = Registry.CurrentUser;
@@ -302,33 +301,8 @@ namespace GroupPolicyInterface.ViewModels
             }
             softwareKey.Close();
             masterKey.Close();
+            UpdatePolicies();
         }
-        public void UpdatePolicies()
-        {
-
-            IEnumerable<GroupPolicy> ReadCSV(string fileName)
-            {
-                string[] lines = File.ReadAllLines(fileName);
-
-                return lines.Select(lineToSplit =>
-                {
-                    string[] data = lineToSplit.Split(';');
-                    string type = "";
-                    string nameOnly = data[name].TrimStart('"');
-                    if (data[name].Contains("["))
-                    {
-                        string fullName = data[name].TrimStart('"');
-                        int typeStartIndex = fullName.IndexOf("[");
-                        int typeEndIndex = fullName.IndexOf("]");
-                        type = fullName.Substring(typeStartIndex + 1, typeEndIndex - 1);
-                        nameOnly = fullName.Substring(typeEndIndex + 1);
-                    }
-                    return new GroupPolicy(type, nameOnly, data[shortDescription], data[longDescription],
-                        data[regPath], data[keyName], data[keyValueKind], data[enabledValue], data[disabledValue]);
-                });
-            }
-            _gpoList = new ObservableCollection<GroupPolicy>(ReadCSV(filename));
-            MessageBox.Show("Updating...");
-        }
+        
     }
 }

@@ -109,8 +109,8 @@
             </DataGrid.RowDetailsTemplate>
         </DataGrid>
         <Button Content="{Binding textSaveButton}" Command="{Binding SavePoliciesButtonCommand}" HorizontalAlignment="Left" Margin="618.667,22,0,0" VerticalAlignment="Top" Width="129" Height="64" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"/>
-        <Button Content="{Binding textEnableAllButton}" Command="{Binding EnableAllPoliciesButtonCommand}" Grid.Column="1" HorizontalAlignment="Left" Height="64" Margin="132.667,22,0,0" Grid.Row="2" VerticalAlignment="Top" Width="129"/>
-        <Button Content="{Binding textDisableAllButton}" Command="{Binding DisableAllPoliciesButtonCommand}" HorizontalAlignment="Right" Height="64" Margin="0,22,0.333,0" Grid.Row="2" VerticalAlignment="Top" Width="129" />
+        <Button Content="{Binding textEnableAllButton}" Command="{Binding EnableAllPoliciesButtonCommand}" HorizontalAlignment="Left" Height="64" Margin="90,22,0,0" Grid.Row="2" VerticalAlignment="Top" Width="129" Grid.ColumnSpan="2"/>
+        <Button Content="{Binding textDisableAllButton}" Command="{Binding DisableAllPoliciesButtonCommand}" HorizontalAlignment="Right" Height="64" Margin="0,22,392.667,0" Grid.Row="2" VerticalAlignment="Top" Width="129" Grid.Column="1" />
         <Button Content="{Binding textResetAllButton}" Command="{Binding ResetAllPoliciesButtonCommand}" Grid.Column="1" HorizontalAlignment="Left" Height="64" Margin="380.667,22,0,0" Grid.Row="2" VerticalAlignment="Top" Width="129"/>
     </Grid>
 </UserControl>
